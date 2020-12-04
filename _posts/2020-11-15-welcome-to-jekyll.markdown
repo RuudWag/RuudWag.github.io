@@ -4,13 +4,13 @@ title:  "How I found a best known solution for VRP!"
 date:   2020-11-15 13:39:25 -0600
 categories: jekyll update
 ---
-Welcome to my first blog. I have been thinking about writing this blog for a long time. On 18 March 2016, During my master thesis at Tilburg University, I achieved best known solution for the c1_10_8 of the Gehring & Homberger vehicle routing problems (https://web.archive.org/web/20160320064048/https://www.sintef.no/projectweb/top/vrptw/homberger-benchmark/1000-customers/). For a master student in operations research this is one of the biggest achievements you can get. As you can see I had to use a link from the internet archive, because a couple months after my solution someone else found even a better solution. Today in this blog I want to show you what kind of algorithms I have used and the awful code I have written.
+Welcome to my first blog! I have been thinking about writing this blog for a long time. On 18 March 2016, when writing my master thesis at Tilburg University, I achieved the best-known solution for the c1_10_8 of the Gehring & Homberger vehicle routing problems (https://web.archive.org/web/20160320064048/https://www.sintef.no/projectweb/top/vrptw/homberger-benchmark/1000-customers/). For a master student in Operations Research this is one of the biggest achievements you can get. As you can see, I had to use a link from the internet archive because a couple months after my solution someone else found an even better solution. Today in this blog I want to show you what kind of algorithms I have used and the awful code I have written.
 
 What is the Vehicle routing problem?
 
 You can download the Gehring & Homberger vehicle routing problems from this website: https://www.sintef.no/projectweb/top/vrptw/homberger-benchmark/1000-customers/
 
-If you open up one the files the first lines look as follows:
+If you open one of the files, the first lines look as follows:
 
     c1_10_8
 
@@ -26,28 +26,30 @@ If you open up one the files the first lines look as follows:
     2       5        297         10        857       1116         90
     3     355        177         20        141        298         90
 
-The vehicle routing problem is pretty easy to understand. In the c1_10_8 case we have a total of 1000 customers. Each customer has a x coordinate and a y coordinate. To calculate the distance we use the euclidean distance. Futhermore each customer has demand, when it is ready to be served, the due date before it should be served and the time it takes to serve. We also have the number of vehicles available and the capacity of a given vehicle. In this problem set all vehicles have the same size. The first goal of this problem is to use the least amount of vehicles as possible and the secondary goal is to minimize the total distance traveled. 
+The vehicle routing problem is pretty easy to understand. In the c1_10_8 case we have a total of 1000 customers. Each customer has a x-coordinate and a y-coordinate. To calculate the distance we use the euclidean distance. Furthermore each customer has a demand, ready time, due date and service time. We also have the number of vehicles available and the capacity of a given vehicle. In this problem all vehicles have the same capacity. The first goal of this problem is to minimize the number of vehicles and the secondary goal is to minimize the total distance traveled. 
 
-The problem described here is called the VRPTW (Vehicle routing problem with Time Windows). In the literature we also have the CVRP, DCVRP, VRPPD, VRPDTW, VRPBTW, VRPB and probably many more. See the wiki page for more info.
+The problem described here is called the VRPTW (Vehicle Routing Problem with Time Windows). In the literature we also have the CVRP, DCVRP, VRPPD, VRPDTW, VRPBTW, VRPB and probably many more. See the Wiki page for more info.
 
 What makes it so interesting?
 
-The vehicle routing problem is a NP-Hard problem. This means that the time to find the optimal solution for this problem increases exponential with the size of the problem. For smaller problems we can find the optimal solution in reasonable, but for 1000 customers it would probably takes years to solve. To be able to solve those problems within reasonable time we use heuristics. A heuristic is a combination of practical methods to find a solution. An example would be that you start with an empty solution and insert each customer one by one until all customers are in a vehicle. We have no idea whether the solution found is the optimal solution. The Gehring and Homberger instances were created in 2000, but even this year better heuristics are found for some of the instances. 
+The vehicle routing problem is a NP-Hard problem. This means that the time to find the optimal solution for this problem increases exponential with the size of the problem. For smaller problems we can find the optimal solution in reasonable time, but for 1000 customers it would probably take years to solve. To be able to solve those problems within reasonable time we use heuristics. A heuristic is a combination of practical methods to find a solution. An example would be that you start with an empty solution and insert each customer one by one until all customers are in a vehicle. We have no idea whether the solution found is the optimal solution. The Gehring and Homberger instances were created in 2000, but even this year better heuristics were found for some of the instances. 
 
 My research
 
-In September 2015 the time had come. I finished all my courses, and to get my Masters degree I had to write my master thesis. I have a few passions in my life, I like programming, I like the field of operations research and I like gaming. At that time I had a crappy laptop and no money to buy a new one. So I came up with a master plan, what if I propose to write my master thesis about the vehicle routing problem, but instead of using the CPU to solve it I will use the GPU. So i proposed this to my professors and they thought this was a good idea. Because the professor was convinced, my parents where also convinced to invest in me and give me a brand new computer with a Nvidia GTX 970 (self build ofcourse). 
+In September 2015, the time had come. I finished all my courses, and to get my master’s degree I had to write my master thesis. I have a few passions in my life; programming,  the field of Operations Research and gaming. At that time I had a crappy laptop and no money to buy a new one. So, I came up with a master plan to write my master thesis about the vehicle routing problem. Instead of using the CPU to solve it I wanted to use the GPU. My professors accepted my proposal and luckily my parents where also convinced to invest in me and give me a brand-new computer with a Nvidia GTX 970 (self build ofcourse). 
 
-So I had my new computer, an idea and GTA V. Although I said I like programming, I did not have a lot of experience with it. After some research I figured out that using CUDA with c++ would be the best choice. I did not have any experience with either of them, so that was going to be fun. Before continue reading, I have to warn you. The code you are going to experience in this blog might hurt your eyes. But hey, in the end it worked and I was able to get my best solution.
+So, I had my new computer, an idea and GTA V. Although I said I like programming, I did not have much experience with it. After some research I figured out that using CUDA with c++ would be the best choice. I never used either of them, so that was going to be fun. Before continue reading, I must warn you. The code you are going to experience in this blog might hurt your eyes. But hey, in the end it worked and I was able to get my best solution.
 
 The algorithm
 
-This research was not about finding new algorithms, but trying to parallelize an existing algorithm to the GPU. So I went to the sintef.no website and looked at the papers which had by that time the most best known solutions. Most of my algorithm is based on this paper: A powerful route minimization heuristic for the vehicle routing problem with
+This research was not about finding a new algorithm but trying to parallelize an existing algorithm to the GPU. I went to the sintef.no website and looked at the papers with the best-known solutions. Most of my algorithm is based on this paper: A powerful route minimization heuristic for the vehicle routing problem with
 time windows by Yuichi Nagata and Olli Bräysy  (https://www.sciencedirect.com/science/article/abs/pii/S0167637709000662). Credits to them for figuring out this beautiful algorithm.
 
-Note that all my code is included in one file and can be found here ???. 
+Note that all my code can be found here ???. 
 
-To explain the algorithm I picked some parts of the code and try to explain what is happening in that part. I do not explain everything in detail, because that would be boring.
+To explain the algorithm, I clarify only a few parts of the code. I do not explain everything in detail, because that would be boring.
+
+
 
 <details><summary><div style="width:200px;height:25px;border:1px solid #999;">Click to show code!</div></summary>
 <p>
