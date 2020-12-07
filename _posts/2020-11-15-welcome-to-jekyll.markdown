@@ -4,7 +4,7 @@ title:  "How I found a best known solution for VRP!"
 date:   2020-11-15 13:39:25 -0600
 categories: jekyll update
 ---
-Welcome to my first blog! I have been thinking about writing this blog for a long time. On 18 March 2016, when writing my master thesis at Tilburg University, I achieved the best-known solution for the c1_10_8 of the Gehring & Homberger vehicle routing problems (https://web.archive.org/web/20160320064048/https://www.sintef.no/projectweb/top/vrptw/homberger-benchmark/1000-customers/). For a master student in Operations Research this is one of the biggest achievements you can get. As you can see, I had to use a link from the internet archive because a couple months after my solution someone else found an even better solution. Today in this blog I want to show you what kind of algorithms I have used and the awful code I have written.
+Welcome to my first blog! I have been thinking about writing this blog for a long time. On 18 March 2016, when writing my master thesis at Tilburg University, I achieved the best-known solution for the c1_10_8 of the Gehring & Homberger vehicle routing problems (https://web.archive.org/web/20160320064048/https://www.sintef.no/projectweb/top/vrptw/homberger-benchmark/1000-customers/). For a master student in Operations Research this is one of the biggest achievements you can get. As you can see, I had to use a link from the internet archive because a couple months after my solution someone else found an even better solution. Today in this blog I want to show you what kind of algorithms I have used and explain the awful code I have written.
 
 What is the Vehicle routing problem?
 
@@ -26,19 +26,19 @@ If you open one of the files, the first lines look as follows:
     2       5        297         10        857       1116         90
     3     355        177         20        141        298         90
 
-The vehicle routing problem is pretty easy to understand. In the c1_10_8 case we have a total of 1000 customers. Each customer has a x-coordinate and a y-coordinate. To calculate the distance we use the euclidean distance. Furthermore each customer has a demand, ready time, due date and service time. We also have the number of vehicles available and the capacity of a given vehicle. In this problem all vehicles have the same capacity. The first goal of this problem is to minimize the number of vehicles and the secondary goal is to minimize the total distance traveled. 
+The vehicle routing problem is pretty easy to understand. In the c1_10_8 case you have a total of 1000 customers. Each customer has a x-coordinate and a y-coordinate. To calculate the distance between two customers you use the euclidean distance. Furthermore each customer has a demand, ready time, due date and service time. You also have the number of vehicles available and the capacity of a given vehicle. The first goal of this problem is to minimize the number of vehicles and the secondary goal is to minimize the total distance traveled. 
 
-The problem described here is called the VRPTW (Vehicle Routing Problem with Time Windows). In the literature we also have the CVRP, DCVRP, VRPPD, VRPDTW, VRPBTW, VRPB and probably many more. See the Wiki page for more info.
+The problem described here is called the VRPTW (Vehicle Routing Problem with Time Windows). In the literature you also have the CVRP, DCVRP, VRPPD, VRPDTW, VRPBTW, VRPB and probably many more. See the Wiki page (https://en.wikipedia.org/wiki/Vehicle_routing_problem) for more info.
 
 What makes it so interesting?
 
-The vehicle routing problem is a NP-Hard problem. This means that the time to find the optimal solution for this problem increases exponential with the size of the problem. For smaller problems we can find the optimal solution in reasonable time, but for 1000 customers it would probably take years to solve. To be able to solve those problems within reasonable time we use heuristics. A heuristic is a combination of practical methods to find a solution. An example would be that you start with an empty solution and insert each customer one by one until all customers are in a vehicle. We have no idea whether the solution found is the optimal solution. The Gehring and Homberger instances were created in 2000, but even this year better heuristics were found for some of the instances. 
+The vehicle routing problem is a NP-Hard problem. This means that the time to find the optimal solution for this problem increases exponential with the size of the problem. For smaller problems you can find the optimal solution in reasonable time, but for 1000 customers it would probably take years to solve. To be able to solve those problems within reasonable time you use heuristics. A heuristic is a combination of practical methods to find a solution. An example would be that you start with an empty solution and insert each customer one by one until all customers are in a vehicle. You have no idea whether the solution found is the optimal solution. The Gehring and Homberger instances were created in 2000, but even this year better heuristics were found for some of the instances. 
 
 My research
 
-In September 2015, the time had come. I finished all my courses, and to get my master’s degree I had to write my master thesis. I have a few passions in my life; programming,  the field of Operations Research and gaming. At that time I had a crappy laptop and no money to buy a new one. So, I came up with a master plan to write my master thesis about the vehicle routing problem. Instead of using the CPU to solve it I wanted to use the GPU. My professors accepted my proposal and luckily my parents where also convinced to invest in me and give me a brand-new computer with a Nvidia GTX 970 (self build ofcourse). 
+In September 2015, the time had come. I finished all my courses, and to get my master’s degree I had to write my master thesis. I have a few passions in my life; programming, the field of Operations Research and gaming. At that time I had a crappy laptop and no money to buy a new one. So, I came up with a master plan to write my master thesis about the vehicle routing problem. Instead of using the CPU to solve it I wanted to use the GPU. My professors accepted my proposal and luckily my parents where also convinced to invest in me and give me a brand-new computer with a Nvidia GTX 970 (self build ofcourse). 
 
-So, I had my new computer, an idea and GTA V. Although I said I like programming, I did not have much experience with it. After some research I figured out that using CUDA with c++ would be the best choice. I never used either of them, so that was going to be fun. Before continue reading, I must warn you. The code you are going to experience in this blog might hurt your eyes. But hey, in the end it worked and I was able to get my best solution.
+I had my new computer, an idea and GTA V. Although I said I like programming, I did not have much experience with it. After some research I figured out that using CUDA with c++ would be the best choice. I never used either of them, so that was going to be fun. Before continue reading, I must warn you. The code you are going to experience in this blog might hurt your eyes. But hey, in the end it worked and I was able to get my best solution.
 
 The algorithm
 
@@ -48,8 +48,6 @@ time windows by Yuichi Nagata and Olli Bräysy  (https://www.sciencedirect.com/s
 Note that all my code can be found here ???. 
 
 To explain the algorithm, I clarify only a few parts of the code. I do not explain everything in detail, because that would be boring.
-
-
 
 <details><summary><div style="width:200px;height:25px;border:1px solid #999;">Click to show code!</div></summary>
 <p>
@@ -202,7 +200,7 @@ int main()
 </p>
 </details>
 
-This is the start of the program. Note that some variables have the d_ prefix and others the h_. This has actually a meaning, namely the d_ stands for device which means the GPU and the h_ stands for host which means the host. Before doing anything we have to make sure that enough memory is set for the variables. As you can see some Mallocs are dependent on the global variable Blocks. The reason for this is because the original algorithm was single threaded. Some parts I could parallelize to use about a 1000 threads at the same time. The challenge with the GPU is that you need ten thousands of threads to be really efficient. So my solution to achieve more parallelization is to solve the same problem multiple times at the same time with a different random seed. This way I can use 100 * 1000 = 100000 threads at the same time.
+This is the start of the algorithm. Note that some variables have the d_ prefix and others the h_. The d_ stands for device, variables allocated on the GPU and the h_ stands for host, variables allocated on the CPU. You must make sure that enough memory is allocated for the variables by using the CudaMallocHost for the host variables and CudaMalloc for the device variables. Most allocations are dependent on the global variable Blocks. Later, I will explain what this variable means 
 
 Why some variables have up to a number 1 to 4 I don't know. 
 
@@ -362,15 +360,23 @@ int loop = 0;
 </p>
 </details>
 
-Most of this code is still run on the CPU. This part is mainly responsible for reading the data files and assigning the memory to the GPU. The most interesting part is the cudaMemcpy. This function copies either data from the host(CPU) to the Device(GPU) when using cudaMemcpyHostToDevice or the other way around. Remember, all variables with h_ are living on the CPU and all variables with d_ are living on the GPU
+This code mainly responsible for reading the data files and copying the values to the GPU by using the cudaMemcpy. This function copies data from the host (CPU) to the Device (GPU) when using cudaMemcpyHostToDevice or vice versa by using cudaMemcpyDeviceToHost. 
 
-In this part I also create the data structures which are used throughout the whole algorithm. The most important one is the d_Route[] array. This array holds all the routes. As you can see the size of d_Route is N*2. The start state of the algorithm used is that every customer has its own vehicle. We have N for the number of customers and N for the number of vehicles. So if we have 3 customers, 0, 1 and 2 are corresponding to the customers and 3, 4, 5 are the start and end of the vehicles. A route looks as follows, we start at vehicle, go to the customers and end at the vehicle. So for example we have a route which goes from vehicle 4 to 1 to 3 and then back to 4. d_Route[4] will mean to which customer you are going from vehicle 4, in this case 1, from customer 1 we go to customer 3, so d_Route[1] = 3, and finally we go back to vehicle 4, d_Route[3] = 4. We also have the this array the other way around d_PrevRoute. By checking d_Route[x] > N we know that we are at the end of the route. This trick is used many times in the code. Other arrays like h_CustDem, h_CustRed, h_CustDue and so on are for demand, ready time and due date. If you want to have the demand for customer 1 you can use h_CustDem[1] to get it. As you can see I use the structure of arrays (AoS).
+In the code above I create the data structures which are used throughout the whole algorithm. The easy ones are the arrays like CustDem, CustRed, CustDue and so on. CustDem[0] will give you the demand for customer 0. The most important data structure is the Route[] array.  Route[0] has the value to which customer you are going from customer 0. At the start of the algorithm every customer has its own vehicle. To be able to model this I made the size of the Route array N*2. The first N entries are for the customers and the second N entries are for the vehicles. A route starts at a vehicle, goes to the customers and ends at the same vehicle. For example, assume that you have a problem with 3 customers. Then the indices 0, 1 and 2 are for the customers. The vehicles have indices 3, 4 and 5. An example route could be going from vehicle 3 to customer 0 to customer 2 back to vehicle 3. In that case the values for Route will be:  Route[3]=0,  Route[0]=2 and Route[2] = 3.
+To loop over a route I use the following code often:
 
-The advantage of this structure is that it is easy to insert and remove customers from a route. If we for example want to remove customer 1 from our previous route we can just set d_Route[4] to 3 and d_PrevRoute[3] to 1. In the algorithm we set d_Route[1] to -1, such that we know it is not in the current solution. Inserting is also easy, but I let that as an excercise for the readers.
+{% highlight cpp linenos%}
+int customer = Route [ 3 ];
+while ( customer < N )
+{
+	customer = Route [ customer ];
+}
+				} {% endhighlight %}
+I loop through the route until the customer has a value higher than N. I also have a data structure to loop in reverse thought the route, PrevRoute[].
 
-Another important variable is the h_NCars. This number gives the number of currently active cars. In our small example this number will start with 3, so that means that vehicles 3, 4, 5 are active and h_Route[3], h_Route[4] and h_Route[5] should hold actual routes. In the algorithm we try to decrease the number of cars, so after some time NCars will hopefully be 2. This means that accessing h_Route[5] can hold any number and should not be used. 
+The advantage of this structure is that it is easy to insert and remove customers from a route. If I for example want to remove customer 0 from our previous route, I can set Route[3] to 2 and PrevRoute[2] to 3. I set d_Route[0] to -1, such that I know it is not in the current solution. Inserting is also easy, but I leave that as an exercise for the readers.
 
-Later on I will tell more about the Blocks variable.
+Another important variable is the h_NCars. This number gives the number of currently active vehicles. In our small example this number will start with 3, so that means that vehicles 3, 4 and 5 are active and  Route[3],  Route[4] and  Route[5] have actual routes. I try to decrease the number of vehicles in the algorithm, so after some time NCars will hopefully be 2. The algorithm will switch vehicles in such a way that that the vehicles up to NCars are valid vehicles. So, if I remove vehicle 3, I will switch the customers from vehicle 5 to vehicle 3 such that vehicle 3 and 4 are valid routes. I must make sure to not use Route[5], because it has an invalid route.
 
 <details><summary><div style="width:200px;height:25px;border:1px solid #999;">Click to show code!</div></summary>
 <p>
@@ -422,7 +428,11 @@ h_Optimizeiterations[ 0 ] = 2000;
 </p>
 </details>
 
-This part of the code is actually going to run on the GPU. Most code you can ignore except for line 13. This is a way to call a GPU function. In the call you have to define how many blocks and how many thread you want to use. Let me show one more code snippet before I am going to explain what blocks and threads mean.
+On line 13 I am going to call the algorithm on the GPU. As parameters I pass in the device variables created before and I must set the number of blocks and thread I want to use. 
+
+To explain threads and blocks I must go into detail on how the GPU works. A GPU consist of multiple streaming multiprocessors(SMs), the GTX 970 has 13 SMs. A block will be assigned to one of those SMs. Each block will have the number of threads you have assigned. In my code I use 100 blocks with 256 threads. So, in total I will have 100*256 = 25 600 threads running concurrently to each other.
+
+Earlier you saw that a lot of allocations are dependent on those blocks. The reason is that to achieve enough parallelism, I solve the same problem 100 times with different random seeds. Every block represents a different solution and has its own dedicated Route[]. That is why I allocate (NumberCustomers * 2 * Blocks) for this variable. 
 
 <details><summary><div style="width:200px;height:25px;border:1px solid #999;">Click to show code!</div></summary>
 <p>
@@ -487,28 +497,28 @@ __global__ void PMA( int* G_Route, int* PCust, float* TW, int* Car, const float*
 </p>
 </details>
 
-Here I have to go a little more into the detail on how the GPU works. There are three main types of memory, the global memory, shared memory and registers. The global memory is just the advertised memory you see ads, in my case it is 4 GB. This is the slowest to access. To make things faster you also have shared memory. The shared memory is what I am using in this part of the code with the __shared__ keyword. A GPU is build out off multiple so called streaming multiprocessors. Every streaming multiprocessor has a dedicated part of shared memory. For the GTX 970 we have 13 streaming multiprocessors with each 96kb of shared memory. A block (the blocks I talked about before) is assigned to a streaming multiprocessors. If we say we want to use 13 blocks, each block will have access to 96kb of shared memory. But if we double the number of blocks to 26, then each block will only have 48kb of shared memory. You can also set the number of threads for a block. So in my code I have 100 blocks with each 256 threads. In total we will have 25600 threads. The global memory is accasible by any thread. The shared memory is only accisible for the threads within the same block. As last we have the registers, this is the local storage for a thread. This is really small, but super fast. Only the thread itself can access this memory.
+There are three main types of memory on the GPU, the global memory, shared memory and registers. The global memory is the biggest, in my case it is 4 GB and is the slowest. All the d_ variables are allocated on the global memory. If you access a d_ variable often, you can make it faster by using the shared memory. To allocate on the shared memory I am using the __shared__ keyword. Every streaming processor has 96kb which must be shared by the blocks using that streaming processor.
 
-To summarize this, we want to minimize the times we access the global memory, and maximize the amout we access the shared and registers.
+The global memory is accasible by any thread. The shared memory is only accisible for the threads within the same block. As last you have the registers, this is the local storage for a thread. This is small, but super fast. Only the thread itself can access this memory.
 
-Another important thing for the GPU is how you access your memory. A GPU runs multiple threads at the same time, this is called the Same Instruction Multiple Threads (SIMT) model. What this means for us is that every line of code is executed by 32 threads at a time (called a warp). As you can see in the code we have a variable called threadIdx.x. For the first thread this will hold value 0, for the second 1 and so on. We also have something similar for the blocks, blockIdx.x. So the index for this one G_Route[ threadIdx.x + 2 * blockIdx.x * N ] for the 2nd block and 10th thread will be 9 + 2 * 1 * 1000 = 2009. If we look to the first warp on the first block we will access G_Route[0], G_Route[1] ,...,G_Route[31] at the same time. This is perfect because when we read G_Route[0] from the global memory we fetch it as a 128 byte block. so in this case we actually will read G_Route[0] ,..., G_Route[31] in one go. If for example we would need G_Route[0] and G_Route[100] in the same warp we would have to do two fetches to the global memory.
+How you structure your code is important on the GPU. A GPU runs multiple threads at the same time, this is called the Same Instruction Multiple Threads (SIMT) model. What this means is that every line of code is executed by 32 threads at the same time (called a warp). Every thread has a number which can be accessed threadIdx.x. For the first thread in a block this will hold value 0, for the second 1 and so on. You also have something similar for the blocks, blockIdx.x. I use those numbers to be able to access the correct route in a block. Using G_Route[threadIdx.x + N*2* blockIdx.x] will access for the first block and the first warp   G_Route[0], G_Route[1] ...,G_Route[31] at the same time. This is perfect because all the values are next to each other in the global memory. If for example I would need G_Route[0] and G_Route[100] in the same warp this would be less efficient on the global memory.
 
-To summarize this, If we read data, we want to make sure make sure it is next to each other.
+To summarize this, if you read data, you want to make sure make sure it is next to each other.
 
-I wanted to keep the part on the GPU short, but I have to mention one more important factor when coding on the GPU. As I told you earlier code is executed in warps. If we have for some reason the following code: 
+I wanted to keep the part on the GPU short, but I must mention one more important factor. If you have for some reason the following code: 
 
 {% highlight cpp linenos%}
 if (threadIdx.x == 0)
 {
-	DoSomeExpensiveCalculation();
+    DoSomeExpensiveCalculation();
 }
 {% endhighlight %}
 
-The warp will only use one thread to execute DoSomeExpensiveCalculation(). The other 31 threads have to wait for for this thread to finish. This warp will only use 1/32 of it's potential power. So if statements can potentially slow down the code by alot.
+The warp will only use one thread to execute DoSomeExpensiveCalculation(). The other 31 threads must wait for for this thread to finish. This warp will only use 1/32 of its potential power.
 
-Going back to the code the last interesting part in this code is __syncthreads();. This is a barrier for the threads within a block. All threads have to reach this point before any thread within the block can continue.
+Going back to the code, you will see that I use __syncthreads(); often. This is a barrier for the threads within a block. All threads must reach this point before any thread within the block can continue.
 
-In this part I have introduced a couple of important variables EP, SEP and CEP and j. EP= Ejection pool, SEP = Size ejection pool, CEP = current customer from ejection pool and j = current position within ejection pool. Let me explain what the ejection pool is by example. When we start the algorithm every customer is assigned to exactly one vehicle. We start out with the following routes 3 -> 0 -> 3, 4 -> 1 -> 4 and 5 -> 2 -> 5. The main goal of the algorithm is to reduce the number of vehicles used. At the start the EP is empty, so j and SEP are 0. In the following code we are going to remove a vehicle:
+In this part I  introduce a couple of important variables EP, SEP and CEP and j. EP= Ejection pool, SEP = Size ejection pool, CEP = current customer from ejection pool and j = current position within the ejection pool. Let me explain what the ejection pool is by example. When I start the algorithm, every customer is assigned to exactly one vehicle. I start out with the following routes 3 -> 0 -> 3, 4 -> 1 -> 4 and 5 -> 2 -> 5. The main goal of the algorithm is to reduce the number of vehicles used. At the start the EP is empty, so j and SEP are 0. In the following code I am going to remove a vehicle:
 
 <details><summary><div style="width:200px;height:25px;border:1px solid #999;">Click to show code!</div></summary>
 <p>
@@ -641,15 +651,13 @@ if ( j == SEP )
 </p>
 </details>
 
-We remove the vehicle where the customers combined have the least penalty. I will explain what I mean with penalty later on. If we for example remove vehicle with route 4 -> 1 -> 4 we put customer 1 in the EP. We only removed one customer, so the SEP will be 1. the variable j will remain to be 0, it is pointing to the customer which is longest in the EP.
+I remove the vehicle where the customers combined have the least penalty. I will explain what penalty means later on. If I remove the vehicle with route 4 -> 1 -> 4, customer 1 is put in the EP. I only removed one customer, so the SEP will be 1. the variable j will remain 0, it is pointing to the customer which is longest in the EP.
 
-Deciding which vehicle should be removed is done in parallel. I just found a bug in this part of the code, because only the vehicles up to the number of threads are taken into account. Every thread evaluates one vehicle and saves the penalty value inside an array which has the size of the number of threads. After all threads are done, we have to find  which thread found the minimal value saved in in the Best array,. This  happens with all the comparisons of the Best array. I could have used one variable to save the best value, but then you need to lock all the other threads when comparing or writing to this variable.
+Deciding which vehicle should be removed is done in parallel. Every thread with a threadIdx.x smaller than NCars will evaluate a vehicle. A thread with a value higher than NCars will do nothing. The threads compare their value with each other to find the best vehicle to remove. 
 
-Between line 74 and 93 I used probably one of the worst cases of parallelization. So we decided which vehicle should be removed, which I called the RNumber in the code. But now we have to add all removed customers to the ejection pool. In the while loop between line 76 and 81 we loop until we finished the route (remember, this happens if Cust[x] > N). or if idx > Counter for every thread individual. In our small example thread 0 will have a temp value of 1 and counter of 0, thread 1 will have temp value of 4 and counter value of 1, thread 2 will have temp value of 4 and counter value of 1, and so on for all 256 threads. A lot of reduntant works is done here. For every thread where the temp value actually represents a customer and not a vehicle, this will be added to the ejection pool, all the other threads set the size of the ejection pool. This works because for all those threads the counter value will be the same.
+At line 93 I used a pattern which I told you before you shouldn't do. I used the if(idx==0). This was a necessary evil, because updating the routes of the solution can only be done by one thread at a time. In this part I decrease the NCars by one and make sure that the Route variable for this block is updated accordingly.
 
-At line 93 I used a pattern which I told you before you shouldn't do. I used the if(idx==0). This was a necessary evil, because updating the routes of the solution can only be done by one thread at a time. In this part I decrease the NCars (number of cars) by one and make sure that all vehicles between N and N + NCars are vehicles which are in use. Remember, All values of Cust above N + NCars are rubish values and should not be used.
-
-So we have removed a vehicle from the solution, the next goal is offcourse to add it back to the solution without using an extra vehicle.
+I have removed a vehicle from the solution, the next goal is to add it back to the solution without using an extra vehicle.
 
 <details><summary><div style="width:200px;height:25px;border:1px solid #999;">Click to show code!</div></summary>
 <p>
@@ -714,11 +722,11 @@ So we have removed a vehicle from the solution, the next goal is offcourse to ad
 </p>
 </details>
 
-First we get the customer which has been longest in the EP, and call it CEP. The first step of the algorithm is to check if we can insert it in any other vehicle at any place without violation the max load of the vehicle, or by violation one of the time windows of any of the other customers in the vehicle. If multiple insertions are possible we pick the one which added the least amount of distance.
+First, I get the customer which has been longest in the EP and call it CEP. The first step of the algorithm is to check if I can insert it in any other vehicle at any place without violation the max capacity of the vehicle or by violation one of the time windows of any of the other customers. If multiple insertions are possible, I pick the one which added the least amount of distance.
 
-The paralellization I did as follows. Because of the way the Cust variable is set up we can easily know what is the next customer for any given customer. In our little example we know that Cust[0] = 3, Cust[1] = -1 and Cust[2] = 5. So in this part thread 0 will check if we can insert the CEP (customer 1) between 0 and 3, thread 1 will do nothing, because customer 1 is in the EP, and thread 2 will check between 2 and 5. I figured out that there is a bug in this code, because I check for idx < N. It is also possible to insert between 3 and 0, which is not checked.
+In our little example you know that Route[0] = 3, Route [1] = -1 and Route[2] = 5. This is easy to parallelize, because thread 0 can check the insertion of CEP between 0 and 3 and thread 2 between 2 and 5. Thread 1 will be idle because customer 1 is not in a route.
 
-If the insertion phase succeeds, we will try to insert the next customer in the ejection pool If we do not have any customers left, we will remove another vehicle. In case we could not find a feasible insertion we go to the next phase, the squeeze phase.
+If the insertion phase succeeds, I will try to insert the next customer in the ejection pool. If I do not have any customers left, I will remove another vehicle. In case I could not find a feasible insertion, I go to the next phase, the squeeze phase.
 
 <details><summary><div style="width:200px;height:25px;border:1px solid #999;">Click to show code!</div></summary>
 <p>
@@ -1874,9 +1882,9 @@ If the insertion phase succeeds, we will try to insert the next customer in the 
 </p>
 </details>
 
-As you can see this part has a lot of code, mostly redundant code I have to say. As far as I remember this part didn't really contribute to finding a better solution, so I will only explain the high level details. The idea of this phase is to allow temporary a infeasibility in the solution. In the insertion phase we inserted the customer in the best solution, in this phase we insert the customer in the spot where it causes the least violation with respect to the load of the vehicle and the time windows of the customers inside the vehicle. After this we try to solve this infeasibility by either moving a customer from this violated vehicle to another vehicle, swap two customers or use a 2-opt algorithm. 
+As you can see this part has a lot of code, mostly redundant code I have to say. As far as I remember this part didn't really contribute to finding a better solution, so I will only explain the high-level details. The idea of this phase is to allow temporary an infeasibility in the solution. I insert the customer in the spot where it causes the least violation with respect to the capacity of the vehicle and the time windows. I try to solve this infeasibility by either moving a customer, swapping two customers or use a 2-opt algorithm. 
 
-I wished I would have used functions.
+I wished I would have used functions. That would probably simplify this code by a lot.
 
 <details><summary><div style="width:200px;height:25px;border:1px solid #999;">Click to show code!</div></summary>
 <p>
@@ -2746,28 +2754,27 @@ I wished I would have used functions.
 </p>
 </details>
 
-I would say phase 3, Penalty for hard customers, is the real heart of this algorithm. I already mentioned the penalty before, but here I am going to explain how it works. If we were not able to insert or squeeze our CEP we increase its penalty for being a hard customer to insert. All customers start with a penalty of 1. Let's assume we were not able to insert customer 1, so we increase the penalty of customer 1 by one(  CustPen[1] = 2)
+I would say phase 3, Penalty for hard customers, is the real heart of this algorithm. I already mentioned the penalty before, but here I am going to explain how it works. If I was not able to insert or squeeze our CEP I increase its penalty for being a hard customer to insert. All customers start with a penalty of 1. Let's assume I was not able to insert customer 1, so I increase the penalty of customer 1 by one(  CustPen[1] = 2)
 
-Now comes the beauty. After giving the CEP a penalty we are going to try to insert it in all possible places. We know all places will be infeasible because of the insertion phase. To make it feasible again we may remove up to three customers in the infeasible vehicle. Which customers we remove depends on the sum of the penalties  of the removed customers. We want to find the spot where we can insert the CEP and make it feasible again by removing the customers with the lowest sum of their penalties. It is also possible to remove the CEP itself. 
+Now comes the beauty. After giving the CEP a penalty, I am going to try to insert it in all possible places.  I want to find the spot where I can insert the CEP and make it feasible again by removing the customers with the lowest sum of their penalties. It is also possible to remove the CEP itself. 
 
-We add the removed customers back the the ejection pool (EP) and go back to the insertion phase. 
+The removed customers are added to the EP and I go back to the insertion phase. 
 
-This phase feels like a hybrid between machine learning and heuristics. After running this algorithm for a while the customers which are hard to insert (for example with a tight time window, or the ones who are far away or with a high demand), probably get a high penalty value. We will leave those customers inside the solution and build the solution around them.
+This phase feels like a hybrid between machine learning and heuristics. After running this algorithm for a while, the customers which are hard to insert probably get a high penalty value. You will leave those customers inside the solution and build the solution around them.
 
-My comments for this part of the code are that it is challenging to understand what I did. There are so many if statements, so the risk that a warp is cut in half, or even worse is significantly. Also this code was very error prone, I've spend whole nights fixing bugs in this part.
+My comments for this part of the code are that it is challenging to understand what I did. There are so many if statements, so the risk that a warp is cut in half, or even worse is significantly. Also, this code was very error prone, I've spent whole nights fixing bugs in this part.
 
 
-
-This was my short explanation of how I used my GPU to parallalize this algorithm. I got very lucky with breaking one of the best known solution, because I didn't come up with a new algorithm. I might have gotten it because I had to make my algorithm based on a paper and maybe I implemented some parts different then how they did it. I will never know, because for a lot of papers they do not publish any source code. Maybe I found it because I solved 100 solution at the same time and was lucky with one of the random seeds. I remember it took about 2 hours to find the new best known solution, so maybe it would take the CPU to long to find it. In the end it does not matter, because it is my name which is shown on the website :).
+This was my explanation of the algorithm and how I used my GPU. I got very lucky with breaking one of the best-known solutions, because I didn't come up with a new algorithm. I might have gotten it because I had to make my algorithm based on a paper and maybe I implemented some parts different then how they did it. I will never know, because for a lot of papers they do not publish any source code. Maybe I found it because I solved 100 solution at the same time and was lucky with one of the random seeds. I remember it took about 2 hours to find the new best-known solution, so maybe it would take the CPU to long to find it. In the end it does not matter, because it is my name which is shown on the website :).
 
 Post master thesis
 
-In hindsight I am really happy I did this master thesis. My code might be horrible, but I have learned a lot about memory management, multi threaded programms and vehicle routing problems. Because of those skill I landed a job at Ortec B.V.. At ORTEC I helped developing their vehicle routing solution (https://ortec.com/en/business-areas/routing-loading). The big difference with my toy project is that we actually solve vehicle routing problems for real clients. And those clients have do not only have demand and time windows, but many more constraints to take into account. At this job I learned to program properly in c++.
+In hindsight I am really happy I did this master thesis. My code might be horrible, but I have learned a lot about memory management, multi-threaded programs and algorithms for vehicle routing problems. Because of those skill I landed a job at ORTEC . At ORTEC I helped developing their vehicle routing solution (https://ortec.com/en/business-areas/routing-loading). The big difference with my toy project is that we actually solve vehicle routing problems for real clients. And those clients do not only have demand and time windows, but many more constraints to take into account. At this job I learned programming properly in c++.
 
-For anyone we has interest doing a similar project as I did I have some advice:
+For anyone who has interest doing a similar project as I did, I have some advice:
 * Try to parallize only parts of the algoritm. In my case it would probably have been easier if I first implemented it on the CPU and then implement the parts which are slow on the GPU. 
 * Use functions (Don't repeat yourself!)
-* In the end you have to start somewhere, so just do it and have fun!
+* In the end you must start somewhere, just do it and have fun!
 
 Thanks for reading my blog!!
 
